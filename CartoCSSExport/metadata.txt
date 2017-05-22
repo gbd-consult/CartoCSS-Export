@@ -1,0 +1,15 @@
+[general]
+name=CartoCssExport
+description=
+about=
+version=1.0
+qgisMinimumVersion=2.0
+author=gbd
+email=admin@gbd-consult.de
+repository=
+tracker=
+homepage=
+icon=
+class_name=CartoCssExportPlugin
+experimental=False
+changelog=

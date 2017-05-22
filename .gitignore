@@ -1,0 +1,9 @@
+.idea
+*.iml
+*.pyc
+*.qgs~
+.DS_Store
+temp*
+node_modules
+doc/_build
+doc/_apidoc
