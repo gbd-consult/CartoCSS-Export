@@ -7,6 +7,7 @@ import defs
 Unit = ['', 'Pixel', 'MM']
 LineStyle = ['solid', 'no', 'dash', 'dot', 'dash dot', 'dash dot dot']
 
+
 class SymbolLayerProps:
     outline_style = LineStyle
     line_style = LineStyle
@@ -34,11 +35,11 @@ class SymbolLayerProps:
     fieldName = ''
     placement = ['AroundPoint', 'Line', 'Curved', 'Horizontal', 'Free']
 
+
 ResolveDefs = {
     'placement': 'Placement'
 
 }
-
 
 
 def symbol_props(cc, sla):
@@ -139,13 +140,10 @@ def do_label(p, d):
     if p.placement == 'Free':
         d['text-placement'] = 'interior'
 
-
-
     d['text-face-name'] = 'string', p.fontFamily + ' ' + p.namedStyle
     d['text-fill'] = 'color', p.textColor
     d['text-name'] = 'field', p.fieldName
     d['text-size'] = 'float', p.fontSize
-
 
 
 def convert(cc, sla, fns):

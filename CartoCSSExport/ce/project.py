@@ -1,6 +1,8 @@
 from qgis.core import *
 import layer
 import debug
+import error
+
 
 def layers(prj):
     for la in groups(prj.layerTreeRoot()):
@@ -33,10 +35,14 @@ def global_metadata(cc, prj):
 
 def metadata(cc, prj):
     lp = [layer.metadata(cc, la) for la in layers(prj)]
+    lp = [x for x in lp if x]
+
+    if not lp:
+        cc.error(error.EMPTY_PROJECT)
 
     d = {
         'Stylesheet': ['style.mss'],
-        'Layer': [x for x in lp if x]
+        'Layer': lp
     }
 
     d.update(global_metadata(cc, prj))

@@ -2,11 +2,13 @@
 
 """Layer converter."""
 
-from qgis.core import *
-import qgis.PyQt.QtXml as Qx
 import re
 
-import labeling, error, defs
+import qgis.PyQt.QtXml as Qx
+from qgis.core import *
+
+import dataprovider
+import labeling
 
 
 def xml2dict(node):
@@ -69,50 +71,16 @@ def id_of(la):
 
 
 def metadata(cc, la):
-    dp = la.dataProvider()  # type: QgsVectorDataProvider
-
-    props = {
+    meta = {
         'srs-name': 'custom',
-        'srs': dp.crs().toProj4(),
         'id': id_of(la),
         'name': id_of(la),
         '_id': la.id(),
-        'geometry': defs.WkbType[dp.geometryType()]
 
     }
 
-    # e = la.extent()
-    # props['extent'] = [
-    #     e.xMinimum(),
-    #     e.yMinimum(),
-    #     e.xMaximum(),
-    #     e.yMaximum()
-    # ]
-
-    if dp.name() == 'postgres':
-        ds = QgsDataSourceURI(dp.dataSourceUri())
-        key = ds.keyColumn()
-        if key == 'tid':
-            key = ''
-        props['Datasource'] = {
-            'type': 'postgis',
-            '_table': ds.quotedTablename(),
-            'table': '(SELECT * FROM %s) AS t' % ds.quotedTablename(),
-            'key_field': key,
-            'geometry_field': ds.geometryColumn(),
-            'dbname': ds.database(),
-            'host': ds.host(),
-            'port': ds.port(),
-            'user': ds.username(),
-            'password': ds.password(),
-            'extent_cache': 'dynamic',
-            'extent': ''
-        }
-
-    else:
-        cc.error(error.DATA_PROVIDER_NOT_IMPLEMENTED, dp.name())
-
-    return props
+    if dataprovider.metadata(cc, la.dataProvider(), meta):
+        return meta
 
 
 def exportQgsVectorLayer(cc, la):
@@ -129,3 +97,9 @@ def exportQgsVectorLayer(cc, la):
         r.zoom = [la.minimumScale(), la.maximumScale()]
 
     return r
+
+
+def exportQgsRasterLayer(cc, la):
+    return cc.rule('RasterLayer', id=id_of(la), layer=la, props={
+        'raster-opacity': ('float', 1)
+    })

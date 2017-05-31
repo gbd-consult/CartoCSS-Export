@@ -1,5 +1,8 @@
 """Error codes."""
 
+#: No layers in this project (loading error?)
+EMPTY_PROJECT = 'EMPTY_PROJECT'
+
 #: No converter for this Qgis class.
 CLASS_NOT_IMPLEMENTED = 'CLASS_NOT_IMPLEMENTED'
 

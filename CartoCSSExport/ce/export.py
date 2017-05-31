@@ -45,7 +45,7 @@ class Process:
 
     def add_expressions(self, meta):
         for lp in meta['Layer']:
-            if 'Datasource' in lp:
+            if 'Datasource' in lp and '_table' in lp['Datasource']:
                 select = ['*']
                 for k, expr_id in self._ds.items():
                     expr, la_id = k
@@ -68,7 +68,7 @@ class Process:
                 r.expr = '_e%d=1' % expr_id
             self.convert_expressions(getattr(r, 'sub', []), getattr(r, 'layer', la))
 
-    def error(self, msg, arg):
+    def error(self, msg, arg=''):
         self._errors.add((msg, unicode(arg)))
 
     def export(self, obj):

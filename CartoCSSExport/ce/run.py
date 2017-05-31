@@ -35,7 +35,11 @@ if __name__ == "__main__":
     print 'loading...'
 
     prj = Q.QgsProject.instance()
-    prj.read(QFileInfo(project_path))
+    res = prj.read(QFileInfo(project_path))
+
+    if not res:
+        print project_path, 'cannot be read'
+        sys.exit(2)
 
     print 'exporting...'
 
