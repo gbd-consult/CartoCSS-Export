@@ -138,7 +138,7 @@ def from_layer_dict(xd):
         if c['name'] == 'labeling':
             if c['attributes'].get('type') == 'simple':
                 lp = simple_labeling_props(xd)
-                if lp['enabled'] != 'true':
+                if lp.get('enabled') != 'true':
                     return None
                 return CeSimpleLabeling(lp)
 
