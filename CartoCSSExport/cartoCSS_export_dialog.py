@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CartoCSSExport
+ CartoCSSExportDialog
                                  A QGIS plugin
  Exports .qgs Project files to CartoCSS
                              -------------------
         begin                : 2017-05-22
+        git sha              : $Format:%H$
         copyright            : (C) 2017 by Geoinformatikbüro Dassau
         email                : info@gbd-consult.de
-        git sha              : $Format:%H$
  ***************************************************************************/
 
 /***************************************************************************
@@ -19,17 +19,23 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
- This script initializes the plugin, making it known to QGIS.
 """
 
+import os
 
-# noinspection PyPep8Naming
-def classFactory(iface):  # pylint: disable=invalid-name
-    """Load CartoCSSExport class from file CartoCSSExport.
+from PyQt4 import QtGui, uic
 
-    :param iface: A QGIS interface instance.
-    :type iface: QgsInterface
-    """
-    #
-    from .cartoCSS_export import CartoCSSExport
-    return CartoCSSExport(iface)
+FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'cartoCSS_export_dialog_base.ui'))
+
+
+class CartoCSSExportDialog(QtGui.QDialog, FORM_CLASS):
+    def __init__(self, parent=None):
+        """Constructor."""
+        super(CartoCSSExportDialog, self).__init__(parent)
+        # Set up the user interface from Designer.
+        # After setupUI you can access any designer object by doing
+        # self.<objectname>, and you can use autoconnect slots - see
+        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
+        # #widgets-and-dialogs-with-auto-connect
+        self.setupUi(self)
