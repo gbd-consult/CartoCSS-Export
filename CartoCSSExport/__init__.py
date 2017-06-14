@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CartoCSSExport
-                                 A QGIS plugin
- Exports .qgs Project files to CartoCSS
+ QGIS Plugin to export .qgs project files to CartoCSS
                              -------------------
         begin                : 2017-05-22
-        copyright            : (C) 2017 by Geoinformatikbüro Dassau
-        email                : info@gbd-consult.de
         git sha              : $Format:%H$
+        copyright            : (C) 2017 by Geoinformatikbüro Dassau GmbH
+        email                : info@gbd-consult.de
  ***************************************************************************/
 
 /***************************************************************************
@@ -19,9 +17,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
- This script initializes the plugin, making it known to QGIS.
 """
-
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name

@@ -1,15 +1,36 @@
+# This file contains metadata for your plugin. Beginning
+# with version 1.8 this is the preferred way to supply information about a
+# plugin. The current method of embedding metadata in __init__.py will
+# be supported until version 2.0
+
+# This file should be included when you package your plugin.
+
+# Mandatory items:
+
 [general]
 name=CartoCssExport
-description=
-about=
-version=1.0
 qgisMinimumVersion=2.0
-author=gbd
-email=admin@gbd-consult.de
-repository=
-tracker=
+description=Export QGIS project files to CartoCSS
+version=1.0
+author=Geoinformatikbüro Dassau GmbH
+email=info@gbd-consult.de
+
+# end of mandatory metadata
+
+# Optional items:
+
+# Uncomment the following line and add your changelog entries:
+# changelog=
+
+# tags are comma separated with spaces allowed
+tags=
+
 homepage=
-icon=
-class_name=CartoCssExportPlugin
+tracker=
+repository=
+icon=icon.png
+# experimental flag
 experimental=False
-changelog=
+
+# deprecated flag (applies to the whole plugin, not just a single version
+deprecated=False

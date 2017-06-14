@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- CartoCSSExportDialog
-                                 A QGIS plugin
- Exports .qgs Project files to CartoCSS
+ QGIS Plugin to export .qgs project files to CartoCSS
                              -------------------
         begin                : 2017-05-22
         git sha              : $Format:%H$
-        copyright            : (C) 2017 by Geoinformatikbüro Dassau
+        copyright            : (C) 2017 by Geoinformatikbüro Dassau GmbH
         email                : info@gbd-consult.de
  ***************************************************************************/
 
