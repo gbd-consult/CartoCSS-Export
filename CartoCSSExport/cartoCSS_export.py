@@ -213,6 +213,7 @@ class CartoCSSExport:
             except:
                 self.dlg.textEdit.append(self.tr("This should not happen"))
             if res:
+                self.dlg.textEdit.clear()
                 self.dlg.textEdit.append(self.tr("Export completed with Warnings"))
                 for r in res:
                     self.dlg.textEdit.append(r[0] + " - " + r[1])
