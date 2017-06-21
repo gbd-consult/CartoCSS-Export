@@ -54,7 +54,7 @@
     <message>
         <location filename="cartoCSS_export.py" line="181"/>
         <source>
-                &lt;h3&gt;CartoCSSExport&lt;/h3&gt;
+                &lt;h3&gt;CartoCSS Export&lt;/h3&gt;
                 &lt;p&gt;A Plugin to export .qgs project files to CartoCSS&lt;/p&gt;
                 &lt;p&gt;Output consists of a project.mml file that describes the layers of the project
                 and a style.mss file that describes the symbology used to draw those layers.&lt;/p&gt;
