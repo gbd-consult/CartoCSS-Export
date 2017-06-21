@@ -51,7 +51,7 @@ class CartoCSSExport:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'CartoCSSExport_{}.qm'.format(locale))
+            '{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -178,6 +178,14 @@ class CartoCSSExport:
         self.dlg.pushButton.clicked.connect(self.selectOutputDir)
         self.dlg.buttonBox.button(QDialogButtonBox.Apply).clicked.connect(self.runExport)
         self.dlg.buttonBox.button(QDialogButtonBox.Close).clicked.connect(self.dlg.close)
+        self.dlg.textEdit_2.append(self.tr('''
+                <h3>CartoCSS Export</h3>
+                <p>A Plugin to export .qgs project files to CartoCSS</p>
+                <p>Output consists of a project.mml file that describes the layers of the project
+                and a style.mss file that describes the symbology used to draw those layers.</p>
+                <p>If a certain property of the project can not be displayed in the CartoCSS format,
+                a Warning is given in the log window.</p>
+                '''))
 
 
     def unload(self):
@@ -197,7 +205,7 @@ class CartoCSSExport:
         # Check if there is an open project
         project = QgsProject.instance()
         if not (project.fileName()):
-            self.iface.messageBar().pushMessage(self.tr("no open Project"), level=QgsMessageBar.CRITICAL, duration=3)
+            self.iface.messageBar().pushMessage(self.tr('no Project opened'), level=QgsMessageBar.CRITICAL, duration=3)
             return 1
         # show the dialog
         self.dlg.show()
@@ -206,21 +214,21 @@ class CartoCSSExport:
         project = QgsProject.instance()
         outdir = self.dlg.lineEdit.text()
         if not os.path.isdir(outdir):
-            self.dlg.textEdit.append(self.tr("Not a valid output directory"))
+            self.dlg.textEdit.append(self.tr('Not a valid output directory'))
         else:
             try:
                 res = ce.run(project,outdir)
             except:
-                self.dlg.textEdit.append(self.tr("This should not happen"))
+                self.dlg.textEdit.append(self.tr('Unknown Error in the export function'))
             if res:
                 self.dlg.textEdit.clear()
-                self.dlg.textEdit.append(self.tr("Export completed with Warnings"))
+                self.dlg.textEdit.append(self.tr('Export completed with Warnings'))
                 for r in res:
                     self.dlg.textEdit.append(r[0] + " - " + r[1])
-            self.dlg.textEdit.append(self.tr("Export saved to") + outdir)
+            self.dlg.textEdit.append(' '.join([self.tr('Export saved to'), outdir]))
 
     def selectOutputDir(self):
-        dirname = QFileDialog.getExistingDirectory(self.dlg, self.tr("Open Directory"),\
+        dirname = QFileDialog.getExistingDirectory(self.dlg, self.tr('Open Directory'),\
                     "/home", QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks)
         self.dlg.lineEdit.setText(dirname)
         self.dlg.buttonBox.button(QDialogButtonBox.Apply).setEnabled(True)
