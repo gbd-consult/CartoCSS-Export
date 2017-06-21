@@ -31,6 +31,7 @@ import os.path
 import ce
 
 
+
 class CartoCSSExport:
     """QGIS Plugin Implementation."""
 
@@ -68,7 +69,21 @@ class CartoCSSExport:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'CartoCSSExport')
         self.toolbar.setObjectName(u'CartoCSSExport')
-
+        
+        # human readable errors
+        self.errors = {
+            'EMPTY_PROJECT'                 : self.tr('Empty Project'),
+            'CLASS_NOT_IMPLEMENTED'         : self.tr('Class not supported'),
+            'PROP_NOT_IMPLEMENTED'          : self.tr('Property not supported'),
+            'DATA_PROVIDER_NOT_IMPLEMENTED' : self.tr('Data Provider not supported'),
+            'UNIT_NOT_IMPLEMENTED'          : self.tr('Unit not supported'),
+            'VALUE_NOT_IMPLEMENTED'         : self.tr('Value not supported'),
+            'EXPRESSION_NOT_SUPPORTED'      : self.tr('Expression not supported'),
+            'EMPTY_EXPRESSION'              : self.tr('Empty Expression'),
+            'INVALID_NUMBER'                : self.tr('Invalid Number'),
+            'INVALID_COLOR'                 : self.tr('Invalid Color'),
+            'INVALID_FIELD'                 : self.tr('Invalid Field')
+        }
 
 
 
@@ -222,10 +237,10 @@ class CartoCSSExport:
                 self.dlg.textEdit.append(self.tr('Unknown Error in the export function'))
             if res:
                 self.dlg.textEdit.clear()
-                self.dlg.textEdit.append(self.tr('Export completed with Warnings'))
+                self.dlg.textEdit.append('<h4>' + self.tr('Export completed with Warnings') + '</h4>')
                 for r in res:
-                    self.dlg.textEdit.append(r[0] + " - " + r[1])
-            self.dlg.textEdit.append(' '.join([self.tr('Export saved to'), outdir]))
+                    self.dlg.textEdit.append(self.errors[r[0]] + " : " + r[1])
+            self.dlg.textEdit.append(' '.join(['<h4>', self.tr('Export saved to'), outdir, '</h4>']))
 
     def selectOutputDir(self):
         dirname = QFileDialog.getExistingDirectory(self.dlg, self.tr('Open Directory'),\

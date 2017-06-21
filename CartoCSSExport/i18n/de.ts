@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="de" sourcelanguage="en">
+<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="en">
 <context>
     <name>@default</name>
     <message>
@@ -12,47 +11,47 @@
 <context>
     <name>CartoCSSExport</name>
     <message>
-        <location filename="cartoCSS_export.py" line="194"/>
+        <location filename="cartoCSS_export.py" line="209"/>
         <source>&amp;CartoCSS Export</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="171"/>
+        <location filename="cartoCSS_export.py" line="186"/>
         <source>CartoCSS Export</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="217"/>
+        <location filename="cartoCSS_export.py" line="232"/>
         <source>Not a valid output directory</source>
         <translation>Ungültiger Dateipfad</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="225"/>
+        <location filename="cartoCSS_export.py" line="240"/>
         <source>Export completed with Warnings</source>
         <translation>Export abgeschlossen. Folgende Attribute konnten nicht exportiert werden:</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="228"/>
+        <location filename="cartoCSS_export.py" line="243"/>
         <source>Export saved to</source>
         <translation>Export wurde gespeichert unter</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="231"/>
+        <location filename="cartoCSS_export.py" line="246"/>
         <source>Open Directory</source>
         <translation>Verzeichnis auswählen</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="208"/>
+        <location filename="cartoCSS_export.py" line="223"/>
         <source>no Project opened</source>
         <translation>kein Projekt geöffnet</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="222"/>
+        <location filename="cartoCSS_export.py" line="237"/>
         <source>Unknown Error in the export function</source>
         <translation>Unbekannter Fehler in der Export Funktion</translation>
     </message>
     <message>
-        <location filename="cartoCSS_export.py" line="181"/>
+        <location filename="cartoCSS_export.py" line="196"/>
         <source>
                 &lt;h3&gt;CartoCSS Export&lt;/h3&gt;
                 &lt;p&gt;A Plugin to export .qgs project files to CartoCSS&lt;/p&gt;
@@ -68,6 +67,61 @@
                 und einer style.mss Datei, die Darstellungsart der Ebenen beschreibt.&lt;/p&gt;
                 &lt;p&gt;Wenn eine bestimmte Eigenschaft des Projekts nicht im CartoCSS Format dargestellt werden kann,
                 so wird eine Warnung im Logfenster ausgegeben.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="75"/>
+        <source>Empty Project</source>
+        <translation>Leeres Projekt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="76"/>
+        <source>Class not supported</source>
+        <translation>Klasse nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="77"/>
+        <source>Property not supported</source>
+        <translation>Eigenschaft nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="78"/>
+        <source>Data Provider not supported</source>
+        <translation>Datendienst nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="79"/>
+        <source>Unit not supported</source>
+        <translation>Einheit nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="80"/>
+        <source>Value not supported</source>
+        <translation>Wert nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="81"/>
+        <source>Expression not supported</source>
+        <translation>Funktion nicht unterstützt</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="82"/>
+        <source>Empty Expression</source>
+        <translation>Leere Funktion</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="83"/>
+        <source>Invalid Number</source>
+        <translation>Ungültiger Wert</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="84"/>
+        <source>Invalid Color</source>
+        <translation>Ungültige Farbe</translation>
+    </message>
+    <message>
+        <location filename="cartoCSS_export.py" line="85"/>
+        <source>Invalid Field</source>
+        <translation>Ungültiges Attribut</translation>
     </message>
 </context>
 <context>
