@@ -4,7 +4,7 @@ import re
 import value, expression
 
 
-def indent(text):
+def indent(text, size=2):
     """Indent a css text."""
 
     def _indent(text):
@@ -15,7 +15,7 @@ def indent(text):
                 continue
             if s.endswith('}'):
                 ii -= 1
-            yield (' ' * (ii * 4)) + s
+            yield (' ' * (ii * size)) + s
             if s.endswith('{'):
                 ii += 1
 

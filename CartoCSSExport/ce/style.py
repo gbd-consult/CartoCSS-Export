@@ -46,16 +46,21 @@ def symbol_props(cc, sla):
     p = SymbolLayerProps()
 
     for name, val in sla.properties().items():
+        info = '%s.%s=%s' % (sla.layerType(), name, val)
+
         if not hasattr(p, name):
-            cc.error(error.PROP_NOT_IMPLEMENTED, sla.layerType() + '.' + name)
+            cc.error(error.PROP_NOT_IMPLEMENTED, info)
             continue
 
         if name in ResolveDefs:
-            val = getattr(defs, ResolveDefs[name])[int(val)]
+            val = getattr(defs, ResolveDefs[name]).get(int(val))
+            if not val :
+                cc.error(error.VALUE_NOT_IMPLEMENTED, info)
+                continue
 
         known_values = getattr(p, name)
         if isinstance(known_values, list) and val not in known_values:
-            cc.error(error.VALUE_NOT_IMPLEMENTED, sla.layerType() + '.' + name + '=' + str(val))
+            cc.error(error.VALUE_NOT_IMPLEMENTED, info)
             setattr(p, name, '')
             continue
 

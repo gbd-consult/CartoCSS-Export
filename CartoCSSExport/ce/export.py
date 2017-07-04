@@ -50,9 +50,9 @@ class Process:
                 for k, expr_id in self._ds.items():
                     expr, la_id = k
                     if la_id == lp['_id']:
-                        select.append('(%s)::int AS _e%d' % (expr, expr_id))
-                lp['Datasource']['table'] = '(SELECT %s FROM %s) AS t' % (
-                    ', '.join(select),
+                        select.append('(\n%s\n)::int AS _e%d' % (expr.strip(), expr_id))
+                lp['Datasource']['table'] = '(SELECT %s\nFROM %s) AS t' % (
+                    ',\n\n'.join(select),
                     lp['Datasource']['_table']
                 )
 
