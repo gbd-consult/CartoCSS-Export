@@ -233,14 +233,15 @@ class CartoCSSExport:
         else:
             try:
                 res = ce.run(project,outdir)
-            except:
+            except Exception as e:
                 self.dlg.textEdit.append(self.tr('Unknown Error in the export function'))
-            if res:
+                self.dlg.textEdit.append(str(type(e)))
+            else:
                 self.dlg.textEdit.clear()
                 self.dlg.textEdit.append('<h4>' + self.tr('Export completed with Warnings') + '</h4>')
                 for r in res:
                     self.dlg.textEdit.append(self.errors[r[0]] + " : " + r[1])
-            self.dlg.textEdit.append(' '.join(['<h4>', self.tr('Export saved to'), outdir, '</h4>']))
+                self.dlg.textEdit.append(' '.join(['<h4>', self.tr('Export saved to'), outdir, '</h4>']))
 
     def selectOutputDir(self):
         dirname = QFileDialog.getExistingDirectory(self.dlg, self.tr('Open Directory'),\
