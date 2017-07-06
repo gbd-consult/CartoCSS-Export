@@ -22,8 +22,8 @@
     </message>
     <message>
         <location filename="cartoCSS_export.py" line="232"/>
-        <source>Not a valid output directory</source>
-        <translation>Ungültiger Dateipfad</translation>
+        <source>Not a valid or missing output directory</source>
+        <translation>Ungültiges oder fehlendes Ausgabeverzeichnis</translation>
     </message>
     <message>
         <location filename="cartoCSS_export.py" line="240"/>
