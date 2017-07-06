@@ -64,8 +64,8 @@
                 &lt;h3&gt;CartoCSS Export&lt;/h3&gt;
                 &lt;p&gt;Ein QGIS Plugin, welches .qgs Projekte nach CartoCSS exportiert&lt;/p&gt;
                 &lt;p&gt;Die Ausgabe besteht aus einer project.mml Datei, welche die Ebenenstruktur des Projekts beschreibt,
-                und einer style.mss Datei, die Darstellungsart der Ebenen beschreibt.&lt;/p&gt;
-                &lt;p&gt;Wenn eine bestimmte Eigenschaft des Projekts nicht im CartoCSS Format dargestellt werden kann,
+                und einer style.mss Datei, welche die Darstellungsart der Ebenen beschreibt.&lt;/p&gt;
+                &lt;p&gt;Wenn eine bestimmte Darstellung des Projekts nicht im CartoCSS Format dargestellt werden kann,
                 so wird eine Warnung im Logfenster ausgegeben.&lt;/p&gt;</translation>
     </message>
     <message>
