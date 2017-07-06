@@ -43,13 +43,13 @@ PLUGINNAME = CartoCSSExport
 
 PY_FILES = \
 	__init__.py \
-	cartoCSS_export.py cartoCSS_export_dialog.py
+	cartoCSS_export.py cartoCSS_export_dialog.py \
 
 UI_FILES = cartoCSS_export_dialog_base.ui
 
 EXTRAS = metadata.txt icon.png
 
-EXTRA_DIRS =
+EXTRA_DIRS = ce
 
 COMPILED_RESOURCE_FILES = resources.py
 
@@ -96,7 +96,7 @@ test: compile transcompile
 	@echo "e.g. source run-env-linux.sh <path to qgis install>; make test"
 	@echo "----------------------"
 
-deploy: compile doc transcompile
+deploy: compile transcompile
 	@echo
 	@echo "------------------------------------------"
 	@echo "Deploying plugin to your .qgis2 directory."
@@ -110,9 +110,8 @@ deploy: compile doc transcompile
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 	# Copy extra directories if any
-  # (temporarily removed)
+	cp -vfr $(EXTRA_DIRS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 
 
 # The dclean target removes compiled python files from plugin directory
