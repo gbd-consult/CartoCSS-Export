@@ -28,6 +28,7 @@ class SymbolLayerProps:
     # @todo: implement with polygon-pattern-file
     style = ['solid', 'no']  # "horizontal","vertical","cross","b_diagonal","f_diagonal","diagonal_x","dense1..7
 
+    fontSizeInMapUnits = 0
     fontFamily = ''
     fontSize = 0
     namedStyle = ''
@@ -46,10 +47,11 @@ def symbol_props(cc, sla):
     p = SymbolLayerProps()
 
     for name, val in sla.properties().items():
+        prop = '%s.%s' % (sla.layerType(), name)
         info = '%s.%s=%s' % (sla.layerType(), name, val)
 
         if not hasattr(p, name):
-            cc.error(error.PROP_NOT_IMPLEMENTED, info)
+            cc.error(error.PROP_NOT_IMPLEMENTED, prop)
             continue
 
         if name in ResolveDefs:
@@ -132,8 +134,8 @@ def do_marker(p, d):
     if p.name == 'arrow':
         d['marker-type'] = 'string', 'arrow'
 
-
 def do_label(p, d):
+
     if p.placement == 'AroundPoint':
         d['text-placement'] = 'point'
     if p.placement == 'Line':
@@ -149,6 +151,9 @@ def do_label(p, d):
     d['text-fill'] = 'color', p.textColor
     d['text-name'] = 'field', p.fieldName
     d['text-size'] = 'float', p.fontSize
+
+    if p.fontSizeInMapUnits == '1':
+        d['text-size'] = 'size', [p.fontSize, 'MapUnit']
 
 
 def convert(cc, sla, fns):

@@ -12,16 +12,33 @@ mm_per_inch = 25.4
 default_ppi = 90
 
 
+def to_float_with_comma(s):
+    try:
+        return float(s)
+    except ValueError:
+        pass
+
+    return float(s.replace(',', '.'))
+
+
+# @todo: this is an arbitrary value
+PX_IN_MAP_UNIT = 10
+
+
 def as_size(val):
     v, unit = val
-    unit = unit.upper()
 
-    if unit == 'MM':
-        v = round((float(v) / mm_per_inch) * default_ppi)
-    elif unit in ('PIXEL', 'PX'):
-        v = round(float(v))
+    v = to_float_with_comma(v)
+    unit = unit.lower()
+
+    if unit == 'mapunit':
+        return PX_IN_MAP_UNIT, error.UNIT_NOT_IMPLEMENTED, unit
+    if unit == 'mm':
+        v = round((v / mm_per_inch) * default_ppi)
+    elif unit in ('pixel', 'px'):
+        v = round(v)
     else:
-        return None, error.UNIT_NOT_IMPLEMENTED
+        return round(v), error.UNIT_NOT_IMPLEMENTED, unit
 
     return str(int(v))
 
@@ -36,11 +53,11 @@ def as_float(val):
         except ValueError:
             pass
         try:
-            return '%s' % float(val)
+            return '%s' % to_float_with_comma(val)
         except ValueError:
             pass
 
-    return None, error.INVALID_NUMBER
+    return None, error.INVALID_NUMBER, val
 
 
 def as_color(val):
@@ -68,14 +85,14 @@ def as_color(val):
     if isinstance(val, (float, int)):
         return '#%06x' % int(val)
 
-    return None, error.INVALID_COLOR
+    return None, error.INVALID_COLOR, val
 
 
 def as_field(val):
     m = re.match(r'^\w+$', val)
     if m:
         return '[%s]' % val
-    return None, error.INVALID_FIELD
+    return None, error.INVALID_FIELD, val
 
 
 def as_list(val):
@@ -142,6 +159,5 @@ def format(typ, val):
     fn = globals().get('as_' + typ)
     res = fn(val)
     if isinstance(res, tuple):
-        _, err = res
-        return val, err
-    return res, None
+        return res
+    return res, None, None

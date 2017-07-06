@@ -33,11 +33,11 @@ def generate(cc, rule):
                 typ, v = 'string', val
             else:
                 typ, v = p[name]
-            f, err = value.format(typ, v)
+            f, err, errval = value.format(typ, v)
             if err:
-                cc.error(err, unicode(val))
-                continue
-            ps.append('%s: %s;' % (name, f))
+                cc.error(err, unicode(errval))
+            if f is not None:
+                ps.append('%s: %s;' % (name, f))
 
         return '\n'.join(ps)
 
