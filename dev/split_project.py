@@ -69,10 +69,7 @@ def read_db_params(prj):
                 return d
 
 
-def envelope():
-    # return [146869.255669, 5230150.5834, 1188395.16989, 6211457.7091]
-
-
+def compute_envelope():
     coords = []
 
     for tab in tables:
@@ -103,22 +100,28 @@ def extract(prj, x, y, bounds, srid):
         new_tab = tab + '_' + xy
 
         text = re.sub(r'(table=.+?)"%s"' % tab, r'\1"' + new_tab + '"', text)
+        mkenv = 'ST_MakeEnvelope(%f, %f, %f, %f, %s)' % (
+            bounds[0],
+            bounds[1],
+            bounds[2],
+            bounds[3],
+            srid)
 
         db_exec('DROP TABLE IF EXISTS %s' % new_tab)
         db_exec('''
             CREATE TABLE %s AS 
                 SELECT * FROM %s 
-                    WHERE ST_Intersects(
-                        wkb_geometry, 
-                        ST_MakeEnvelope(%f, %f, %f, %f, %s))
-        ''' % (
-            new_tab,
-            tab,
-            bounds[0],
-            bounds[1],
-            bounds[2],
-            bounds[3],
-            srid))
+                    WHERE ST_Intersects(wkb_geometry, %s) 
+        ''' % (new_tab, tab, mkenv))
+
+        if tab in ('grenzen', 'flaechen'):
+            db_exec('''
+                UPDATE %s 
+                    SET wkb_geometry = ST_Multi(ST_CollectionExtract(
+                        ST_Intersection(wkb_geometry, %s),
+                        3)) 
+            ''' % (new_tab, mkenv))
+
         r = db_exec('SELECT COUNT(*) AS c FROM %s' % new_tab)
         counts[tab] = int(r[0]['c'])
         # log(tab, '(%s)' % c)
@@ -137,19 +140,21 @@ def extract(prj, x, y, bounds, srid):
     log('ok', repr(counts), '\n')
 
 
-def do_split(prj, xsteps, ysteps):
+def do_split(prj, xsteps, ysteps, envelope):
     params = read_db_params(prj)
     srid = params['srid']
 
     db_connect(params)
 
-    log('computing the envelope \n')
+    if not envelope:
+        log('computing envelope \n')
+        envelope = compute_envelope()
 
-    xmin, ymin, xmax, ymax = envelope()
+    xmin, ymin, xmax, ymax = envelope
     xsize = (xmax - xmin) / float(xsteps)
     ysize = (ymax - ymin) / float(ysteps)
 
-    log('done', xmin, ymin, xmax, ymax, '\n')
+    log('envelope is', xmin, ymin, xmax, ymax, '\n')
 
     for y in range(ysteps):
         for x in range(xsteps):
@@ -183,19 +188,28 @@ def do_drop(prj):
     log(cnt, 'files removed\n')
 
 
-if __name__ == '__main__':
+def main(argv):
+    xsteps = ysteps = envelope = None
+
     try:
-        prj = sys.argv[1]
-        drop = sys.argv[2] == 'drop'
+        prj = argv[1]
+        drop = argv[2] == 'drop'
         if not drop:
-            xsteps = int(sys.argv[2])
-            ysteps = int(sys.argv[3])
+            xsteps = int(argv[2])
+            ysteps = int(argv[3])
+            if len(argv) > 4:
+                envelope = map(float, argv[4].split())
+
     except:
-        print 'usage: split_project.py project-path xsteps ysteps'
+        print 'usage: split_project.py project-path xsteps ysteps <envelope>'
         print 'usage: split_project.py project-path drop'
         sys.exit(1)
 
     if drop:
         do_drop(prj)
     else:
-        do_split(prj, xsteps, ysteps)
+        do_split(prj, xsteps, ysteps, envelope)
+
+
+if __name__ == '__main__':
+    main(sys.argv)
