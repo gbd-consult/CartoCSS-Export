@@ -41,14 +41,8 @@ def run(prj, out_dir):
     cc = export.Process(prj)
     cc.register_exporters(enum_exporters())
 
-    meta, css = cc.run()
+    res = cc.run()
+    res.write_for_tilemill(out_dir)
+    res.write_for_mapbox(out_dir)
 
-    with open(out_dir + '/project.mml', 'w') as fp:
-        json.dump(meta, fp, sort_keys=True, indent=4)
-
-    with open(out_dir + '/style.mss', 'w') as fp:
-        fp.write(css.encode('utf8'))
-
-    #print css.encode('utf8')
-
-    return cc.errors()
+    return res.errors

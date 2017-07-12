@@ -1,6 +1,6 @@
 """Export controller."""
 
-import error, layer, css, project, debug
+import error, result, css, project, debug
 
 
 class Process:
@@ -30,7 +30,7 @@ class Process:
 
         css_text = css.indent(css.generate(self, self._rules))
 
-        return self._meta, css_text
+        return result.ExportResult(self._meta, css_text, self._errors)
 
     def enum_rules(self, rules):
         for r in rules:
@@ -55,6 +55,8 @@ class Process:
                     ',\n\n'.join(select),
                     lp['Datasource']['_table']
                 )
+                del lp['Datasource']['_table']
+                del lp['_id']
 
     def convert_expressions(self, rules, la=None):
         for r in rules:

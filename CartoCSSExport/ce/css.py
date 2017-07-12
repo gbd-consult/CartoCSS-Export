@@ -3,6 +3,10 @@
 import re
 import value, expression
 
+map_props = {
+    'background-color': ['color', '#fff']
+}
+
 
 def indent(text, size=2):
     """Indent a css text."""
@@ -22,30 +26,31 @@ def indent(text, size=2):
     return '\n'.join(_indent(text))
 
 
-def generate(cc, rule):
+def _format_props(cc, plist):
+    ps = []
+
+    for name, val in plist.items():
+        if isinstance(val, basestring):
+            typ, v = 'string', val
+        else:
+            typ, v = plist[name]
+        f, err, errval = value.format(typ, v)
+        if err:
+            cc.error(err, unicode(errval))
+        if f is not None:
+            ps.append('%s: %s;' % (name, f))
+
+    return '\n'.join(ps)
+
+
+def generate_rule(cc, rule):
     """Generate mss text from a ruleset."""
-
-    def fprops(p):
-        ps = []
-
-        for name, val in p.items():
-            if isinstance(val, basestring):
-                typ, v = 'string', val
-            else:
-                typ, v = p[name]
-            f, err, errval = value.format(typ, v)
-            if err:
-                cc.error(err, unicode(errval))
-            if f is not None:
-                ps.append('%s: %s;' % (name, f))
-
-        return '\n'.join(ps)
 
     if not rule:
         return ''
 
     if isinstance(rule, list):
-        return '\n'.join(generate(cc, r) for r in rule)
+        return '\n'.join(generate_rule(cc, r) for r in rule)
 
     sel = []
 
@@ -63,16 +68,22 @@ def generate(cc, rule):
 
     if not sel:
         if not props and len(subs) < 2:
-            return generate(cc, subs)
+            return generate_rule(cc, subs)
 
     sel = ''.join(sel)
 
     if '#' not in sel:
         sel = '::' + rule.typ + '_' + str(rule.uid) + sel
 
-    content = (generate(cc, subs) + '\n' + fprops(props)).strip()
+    content = generate_rule(cc, subs) + '\n' + _format_props(cc, props)
+    content = content.strip()
 
     if content:
         return sel + ' {\n' + content + '\n}\n'
 
     return ''
+
+
+def generate(cc, rule):
+    s = generate_rule(cc, rule)
+    return 'Map {\n' + _format_props(cc, map_props) + '\n}\n' + s

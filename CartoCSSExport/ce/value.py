@@ -67,6 +67,8 @@ def as_color(val):
             return 'rgba(%s)' % val
         if re.match(r'^(\d+,\s*){2}\d+$', val):
             return 'rgba(%s,255)' % val
+        if re.match(r'^#[A-Fa-f0-9]+$', val):
+            return val
 
     # list [r,g,b,a]
     if isinstance(val, (list, tuple)):
