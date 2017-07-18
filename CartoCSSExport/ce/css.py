@@ -31,16 +31,26 @@ def _format_props(cc, plist):
 
     for name, val in plist.items():
         if isinstance(val, basestring):
-            typ, v = 'string', val
-        else:
-            typ, v = plist[name]
-        f, err, errval = value.format(typ, v)
+            val = 'string', val
+        f, err, errval = value.format(*val)
         if err:
             cc.error(err, unicode(errval))
-        if f is not None:
+        if isinstance(f, (list, tuple)):
+            for sel, v in f:
+                ps.append('[%s] { %s: %s }' % (sel, name, v))
+        elif f is not None:
             ps.append('%s: %s;' % (name, f))
 
     return '\n'.join(ps)
+
+
+__uid = 0
+
+
+def _uid():
+    global __uid
+    __uid += 1
+    return __uid
 
 
 def generate_rule(cc, rule):
@@ -73,13 +83,17 @@ def generate_rule(cc, rule):
     sel = ''.join(sel)
 
     if '#' not in sel:
-        sel = '::' + rule.typ + '_' + str(rule.uid) + sel
+        # sel = '::' + rule.typ + '_' + str(rule.uid) + sel
+        sel = '::' + rule.typ + '_' + str(_uid()) + sel
 
     content = generate_rule(cc, subs) + '\n' + _format_props(cc, props)
     content = content.strip()
 
     if content:
-        return sel + ' {\n' + content + '\n}\n'
+        content = sel + ' {\n' + content + '\n}\n'
+        if rule.comment:
+            content = '/* ' + rule.comment + ' */\n' + content
+        return content
 
     return ''
 

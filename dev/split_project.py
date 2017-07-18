@@ -88,6 +88,58 @@ def compute_envelope():
     )
 
 
+def area_intersections(new_tab, mkenv, srid):
+    db_exec('''
+        ALTER TABLE %s 
+            ADD COLUMN inter_wkt TEXT, 
+            ADD COLUMN inter_geom GEOMETRY(MultiPolygon,%s)
+    ''' % (new_tab, srid))
+
+    db_exec('''
+        UPDATE %s 
+            SET inter_wkt = ST_AsText(ST_Intersection(wkb_geometry, %s))
+    ''' % (new_tab, mkenv))
+
+    db_exec('''
+        UPDATE %s 
+            SET inter_geom = ST_GeomFromText(inter_wkt,%s)
+            WHERE inter_wkt LIKE 'MULTIPOLYGON%%'
+    ''' % (new_tab, srid))
+
+    db_exec('''
+        UPDATE %s 
+            SET inter_geom = ST_Multi(ST_GeomFromText(inter_wkt,%s))
+            WHERE inter_wkt LIKE 'POLYGON%%'
+    ''' % (new_tab, srid))
+
+    c1 = db_exec('SELECT COUNT(*) AS c FROM %s' % new_tab)[0]['c']
+
+    db_exec('''
+        DELETE FROM %s 
+            WHERE inter_geom IS NULL
+    ''' % (new_tab,))
+
+    c2 = db_exec('SELECT COUNT(*) AS c FROM %s' % new_tab)[0]['c']
+
+    if c1 - c2:
+        log('[bad_geom=%d]' % (c1 - c2))
+
+    db_exec('''
+        UPDATE %s 
+            SET wkb_geometry = inter_geom
+    ''' % (new_tab,))
+
+    db_exec('''
+        ALTER TABLE %s 
+            DROP COLUMN inter_wkt
+    ''' % (new_tab,))
+
+    db_exec('''
+        ALTER TABLE %s 
+            DROP COLUMN inter_geom
+    ''' % (new_tab,))
+
+
 def extract(prj, x, y, bounds, srid):
     with open(prj) as fp:
         text = fp.read()
@@ -99,7 +151,7 @@ def extract(prj, x, y, bounds, srid):
     for tab in tables:
         new_tab = tab + '_' + xy
 
-        text = re.sub(r'(table=.+?)"%s"' % tab, r'\1"' + new_tab + '"', text)
+        text = re.sub(r'(table=.+?)"%s"' % tab, r'\1"%s"' % new_tab, text)
         mkenv = 'ST_MakeEnvelope(%f, %f, %f, %f, %s)' % (
             bounds[0],
             bounds[1],
@@ -115,12 +167,7 @@ def extract(prj, x, y, bounds, srid):
         ''' % (new_tab, tab, mkenv))
 
         if tab in ('grenzen', 'flaechen'):
-            db_exec('''
-                UPDATE %s 
-                    SET wkb_geometry = ST_Multi(ST_CollectionExtract(
-                        ST_Intersection(wkb_geometry, %s),
-                        3)) 
-            ''' % (new_tab, mkenv))
+            area_intersections(new_tab, mkenv, srid)
 
         r = db_exec('SELECT COUNT(*) AS c FROM %s' % new_tab)
         counts[tab] = int(r[0]['c'])
@@ -140,7 +187,7 @@ def extract(prj, x, y, bounds, srid):
     log('ok', repr(counts), '\n')
 
 
-def do_split(prj, xsteps, ysteps, envelope):
+def do_split(prj, xsteps, ysteps, envelope, onlyx, onlyy):
     params = read_db_params(prj)
     srid = params['srid']
 
@@ -158,6 +205,10 @@ def do_split(prj, xsteps, ysteps, envelope):
 
     for y in range(ysteps):
         for x in range(xsteps):
+            if onlyx is not None and x != onlyx:
+                continue
+            if onlyy is not None and y != onlyy:
+                continue
             bounds = xmin + xsize * x, ymin + ysize * y, xmin + xsize * (x + 1), ymin + ysize * (y + 1)
             extract(prj, x, y, bounds, srid)
 
@@ -190,6 +241,7 @@ def do_drop(prj):
 
 def main(argv):
     xsteps = ysteps = envelope = None
+    onlyx = onlyy = None
 
     try:
         prj = argv[1]
@@ -199,16 +251,19 @@ def main(argv):
             ysteps = int(argv[3])
             if len(argv) > 4:
                 envelope = map(float, argv[4].split())
+            if len(argv) > 5:
+                onlyx = int(argv[5])
+                onlyy = int(argv[6])
 
     except:
-        print 'usage: split_project.py project-path xsteps ysteps <envelope>'
+        print 'usage: split_project.py project-path xsteps ysteps <envelope> <onlyX> <onlyY>'
         print 'usage: split_project.py project-path drop'
         sys.exit(1)
 
     if drop:
         do_drop(prj)
     else:
-        do_split(prj, xsteps, ysteps, envelope)
+        do_split(prj, xsteps, ysteps, envelope, onlyx, onlyy)
 
 
 if __name__ == '__main__':

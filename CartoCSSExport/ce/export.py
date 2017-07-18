@@ -83,15 +83,32 @@ class Process:
             return fn(self, obj)
         self.error(error.CLASS_NOT_IMPLEMENTED, cls)
 
-    def rule(self, typ, **kwargs):
-        return Rule(typ, **kwargs)
+    def rule(self, obj, typ, **kwargs):
+        return Rule(obj, typ, **kwargs)
 
     def errors(self):
         return sorted(self._errors)
 
 
 class Rule:
-    def __init__(self, typ, **kwargs):
-        self.typ = typ
+    def get_comment(self):
+        try:
+            return self.obj.description()
+        except:
+            pass
+        try:
+            return self.obj.name()
+        except:
+            pass
+        try:
+            return self.obj.attributes['description']
+        except:
+            pass
+
+    def __init__(self, obj, typ, **kwargs):
+        self.typ = typ or obj.__class__.__name__
+        self.obj = obj
+        self.comment = self.get_comment()
+
         for k, v in kwargs.items():
             setattr(self, k, v)

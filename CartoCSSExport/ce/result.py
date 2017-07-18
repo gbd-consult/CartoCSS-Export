@@ -17,7 +17,7 @@ class ExportResult:
         self.name = self.meta['name']
 
     def write_for_tilemill(self, out_dir):
-        base = _mkdir(out_dir + '/' + self.name + '.tm')
+        base = _mkdir(out_dir + '/' + self.name + '_tm')
 
         with open(base + '/project.mml', 'w') as fp:
             json.dump(self.meta, fp, sort_keys=True, indent=4)
