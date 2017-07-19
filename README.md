@@ -2,6 +2,17 @@
 
 QGIS Plugin to export QGS Project file to CartoCSS Format
 
+## Install
+
+To install the Plugin:
+
+    cd CartoCSSExport
+    make deploy
+
+This moves the required files to the QGIS Plugin folder. Just activate the Plugin in QGIS and you're done!
+It is also possible to create a .zip archive containing the Plugin by running:
+
+    make zip
 
 ## Directory layout
 
