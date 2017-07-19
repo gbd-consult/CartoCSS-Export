@@ -52,7 +52,7 @@ class CeSimpleLabeling(CeLabelingSymbolLayer):
 
 def exportCeSimpleLabeling(cc, lab):
     props = style.convert(cc, lab, 'label')
-    return cc.rule(lab.layerType(), props=props)
+    return cc.rule(lab, lab.layerType(), props=props)
 
 
 class CeRuleBasedLabeling(CeLabelingSymbolLayer):
@@ -64,7 +64,7 @@ class CeRuleBasedLabeling(CeLabelingSymbolLayer):
 
 
 def exportCeRuleBasedLabeling(cc, lab):
-    return cc.rule('', sub=[cc.export(r) for r in lab.sub])
+    return cc.rule(lab, '', sub=[cc.export(r) for r in lab.sub])
 
 
 class CeRuleBasedLabelingRule(CeLabelingSymbolLayer):
@@ -78,7 +78,8 @@ class CeRuleBasedLabelingRule(CeLabelingSymbolLayer):
 
 
 def exportCeRuleBasedLabelingRule(cc, lab):
-    r = cc.rule(lab.layerType(), sub=[cc.export(r) for r in lab.sub])
+
+    r = cc.rule(lab, lab.layerType(), sub=[cc.export(r) for r in lab.sub])
 
     if 'scalemaxdenom' in lab.attributes:
         r.zoom = [lab.attributes['scalemindenom'], lab.attributes['scalemaxdenom']]

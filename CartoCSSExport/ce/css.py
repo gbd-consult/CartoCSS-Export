@@ -3,6 +3,10 @@
 import re
 import value, expression
 
+map_props = {
+    'background-color': ['color', '#fff']
+}
+
 
 def indent(text, size=2):
     """Indent a css text."""
@@ -22,30 +26,41 @@ def indent(text, size=2):
     return '\n'.join(_indent(text))
 
 
-def generate(cc, rule):
+def _format_props(cc, plist):
+    ps = []
+
+    for name, val in plist.items():
+        if isinstance(val, basestring):
+            val = 'string', val
+        f, err, errval = value.format(*val)
+        if err:
+            cc.error(err, unicode(errval))
+        if isinstance(f, (list, tuple)):
+            for sel, v in f:
+                ps.append('[%s] { %s: %s }' % (sel, name, v))
+        elif f is not None:
+            ps.append('%s: %s;' % (name, f))
+
+    return '\n'.join(ps)
+
+
+__uid = 0
+
+
+def _uid():
+    global __uid
+    __uid += 1
+    return __uid
+
+
+def generate_rule(cc, rule):
     """Generate mss text from a ruleset."""
-
-    def fprops(p):
-        ps = []
-
-        for name, val in p.items():
-            if isinstance(val, basestring):
-                typ, v = 'string', val
-            else:
-                typ, v = p[name]
-            f, err, errval = value.format(typ, v)
-            if err:
-                cc.error(err, unicode(errval))
-            if f is not None:
-                ps.append('%s: %s;' % (name, f))
-
-        return '\n'.join(ps)
 
     if not rule:
         return ''
 
     if isinstance(rule, list):
-        return '\n'.join(generate(cc, r) for r in rule)
+        return '\n'.join(generate_rule(cc, r) for r in rule)
 
     sel = []
 
@@ -63,16 +78,26 @@ def generate(cc, rule):
 
     if not sel:
         if not props and len(subs) < 2:
-            return generate(cc, subs)
+            return generate_rule(cc, subs)
 
     sel = ''.join(sel)
 
     if '#' not in sel:
-        sel = '::' + rule.typ + '_' + str(rule.uid) + sel
+        # sel = '::' + rule.typ + '_' + str(rule.uid) + sel
+        sel = '::' + rule.typ + '_' + str(_uid()) + sel
 
-    content = (generate(cc, subs) + '\n' + fprops(props)).strip()
+    content = generate_rule(cc, subs) + '\n' + _format_props(cc, props)
+    content = content.strip()
 
     if content:
-        return sel + ' {\n' + content + '\n}\n'
+        content = sel + ' {\n' + content + '\n}\n'
+        if rule.comment:
+            content = '/* ' + rule.comment + ' */\n' + content
+        return content
 
     return ''
+
+
+def generate(cc, rule):
+    s = generate_rule(cc, rule)
+    return 'Map {\n' + _format_props(cc, map_props) + '\n}\n' + s

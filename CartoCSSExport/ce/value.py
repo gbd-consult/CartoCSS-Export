@@ -3,13 +3,43 @@
 import re
 import error
 
+# from https://github.com/mapbox/carto/blob/master/lib/carto/tree/zoom.js
 
-def as_string(val):
-    return "'%s'" % unicode(val).strip().replace("'", "\\'")
+CartoZoomRanges = {
+    0: 1000000000,
+    1: 500000000,
+    2: 200000000,
+    3: 100000000,
+    4: 50000000,
+    5: 25000000,
+    6: 12500000,
+    7: 6500000,
+    8: 3000000,
+    9: 1500000,
+    10: 750000,
+    11: 400000,
+    12: 200000,
+    13: 100000,
+    14: 50000,
+    15: 25000,
+    16: 12500,
+    17: 5000,
+    18: 2500,
+    19: 1500,
+    20: 750,
+    21: 500,
+    22: 250,
+    # 23: 100
+}
 
+CartoMaxZoom = max(CartoZoomRanges)
 
 mm_per_inch = 25.4
 default_ppi = 90
+
+
+def as_string(val):
+    return "'%s'" % unicode(val).strip().replace("'", "\\'")
 
 
 def to_float_with_comma(s):
@@ -21,8 +51,23 @@ def to_float_with_comma(s):
     return float(s.replace(',', '.'))
 
 
-# @todo: this is an arbitrary value
-PX_IN_MAP_UNIT = 10
+def to_int(v):
+    if isinstance(v, float):
+        v = round(v)
+    try:
+        return int(v)
+    except ValueError:
+        return v
+
+
+def minmax(amin, val, amax):
+    return max(amin, min(val, amax))
+
+
+# @todo: arbitrary values to replace mapUnits
+MAP_UNIT_SIZE_MIN = 2
+MAP_UNIT_SIZE_MAX = 20
+MAP_UNIT_FONT_SIZE = 12
 
 
 def as_size(val):
@@ -32,15 +77,28 @@ def as_size(val):
     unit = unit.lower()
 
     if unit == 'mapunit':
-        return PX_IN_MAP_UNIT, error.UNIT_NOT_IMPLEMENTED, unit
-    if unit == 'mm':
-        v = round((v / mm_per_inch) * default_ppi)
+        return to_int(minmax(MAP_UNIT_SIZE_MIN, v, MAP_UNIT_SIZE_MAX)), error.UNIT_NOT_IMPLEMENTED, unit
+    elif unit == 'mm':
+        return to_int((v / mm_per_inch) * default_ppi)
     elif unit in ('pixel', 'px'):
-        v = round(v)
+        return to_int(v)
     else:
-        return round(v), error.UNIT_NOT_IMPLEMENTED, unit
+        return to_int(v), error.UNIT_NOT_IMPLEMENTED, unit
 
-    return str(int(v))
+
+def as_fontsize(val):
+    v, unit = val
+
+    if unit.lower() == 'mapunit':
+        return to_int(MAP_UNIT_FONT_SIZE), error.UNIT_NOT_IMPLEMENTED, unit
+    return as_size((v, 'px'))
+
+
+def as_int(val):
+    try:
+        return '%d' % val
+    except ValueError:
+        return None, error.INVALID_NUMBER, val
 
 
 def as_float(val):
@@ -49,7 +107,7 @@ def as_float(val):
 
     if isinstance(val, basestring):
         try:
-            return '%s' % int(val)
+            return '%d' % int(val)
         except ValueError:
             pass
         try:
@@ -67,6 +125,8 @@ def as_color(val):
             return 'rgba(%s)' % val
         if re.match(r'^(\d+,\s*){2}\d+$', val):
             return 'rgba(%s,255)' % val
+        if re.match(r'^#[A-Fa-f0-9]+$', val):
+            return val
 
     # list [r,g,b,a]
     if isinstance(val, (list, tuple)):
@@ -99,36 +159,6 @@ def as_list(val):
     return ', '.join(map(unicode, val))
 
 
-# from https://github.com/mapbox/carto/blob/master/lib/carto/tree/zoom.js
-
-CartoZoomRanges = {
-    0: 1000000000,
-    1: 500000000,
-    2: 200000000,
-    3: 100000000,
-    4: 50000000,
-    5: 25000000,
-    6: 12500000,
-    7: 6500000,
-    8: 3000000,
-    9: 1500000,
-    10: 750000,
-    11: 400000,
-    12: 200000,
-    13: 100000,
-    14: 50000,
-    15: 25000,
-    16: 12500,
-    17: 5000,
-    18: 2500,
-    19: 1500,
-    20: 750,
-    21: 500,
-    22: 250,
-    # 23: 100
-}
-
-
 def as_zoom(val):
     def scale_to_level(scale):
         for l, s in sorted(CartoZoomRanges.items()):
@@ -136,7 +166,7 @@ def as_zoom(val):
                 return l, l
             if scale > s:
                 return max(0, l - 1), l
-        return 22, 22
+        return CartoMaxZoom, CartoMaxZoom
 
     qmin, qmax = map(int, val)
 

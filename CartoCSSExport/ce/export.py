@@ -1,6 +1,6 @@
 """Export controller."""
 
-import error, layer, css, project, debug
+import error, result, css, project, debug
 
 
 class Process:
@@ -30,7 +30,7 @@ class Process:
 
         css_text = css.indent(css.generate(self, self._rules))
 
-        return self._meta, css_text
+        return result.ExportResult(self._meta, css_text, self._errors)
 
     def enum_rules(self, rules):
         for r in rules:
@@ -55,6 +55,8 @@ class Process:
                     ',\n\n'.join(select),
                     lp['Datasource']['_table']
                 )
+                del lp['Datasource']['_table']
+                del lp['_id']
 
     def convert_expressions(self, rules, la=None):
         for r in rules:
@@ -81,15 +83,32 @@ class Process:
             return fn(self, obj)
         self.error(error.CLASS_NOT_IMPLEMENTED, cls)
 
-    def rule(self, typ, **kwargs):
-        return Rule(typ, **kwargs)
+    def rule(self, obj, typ, **kwargs):
+        return Rule(obj, typ, **kwargs)
 
     def errors(self):
         return sorted(self._errors)
 
 
 class Rule:
-    def __init__(self, typ, **kwargs):
-        self.typ = typ
+    def get_comment(self):
+        try:
+            return self.obj.description()
+        except:
+            pass
+        try:
+            return self.obj.name()
+        except:
+            pass
+        try:
+            return self.obj.attributes['description']
+        except:
+            pass
+
+    def __init__(self, obj, typ, **kwargs):
+        self.typ = typ or obj.__class__.__name__
+        self.obj = obj
+        self.comment = self.get_comment()
+
         for k, v in kwargs.items():
             setattr(self, k, v)

@@ -91,7 +91,7 @@ def exportQgsVectorLayer(cc, la):
     if lab:
         sub.append(cc.export(lab))
 
-    r = cc.rule('VectorLayer', id=id_of(la), layer=la, sub=sub)
+    r = cc.rule(la, 'VectorLayer', id=id_of(la), layer=la, sub=sub)
 
     if la.hasScaleBasedVisibility():
         r.zoom = [la.minimumScale(), la.maximumScale()]
@@ -100,6 +100,6 @@ def exportQgsVectorLayer(cc, la):
 
 
 def exportQgsRasterLayer(cc, la):
-    return cc.rule('RasterLayer', id=id_of(la), layer=la, props={
+    return cc.rule(la, 'RasterLayer', id=id_of(la), layer=la, props={
         'raster-opacity': ('float', 1)
     })

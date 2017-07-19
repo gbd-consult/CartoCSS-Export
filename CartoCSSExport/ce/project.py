@@ -2,7 +2,7 @@ from qgis.core import *
 import layer
 import debug
 import error
-
+import os
 
 def layers(prj):
     for la in groups(prj.layerTreeRoot()):
@@ -20,6 +20,14 @@ def groups(group):
             yield tl.layer()
 
 
+def file_name(prj):
+    fn = prj.fileName()
+    if not fn:
+        return 'Untitled'
+    _, fn = os.path.split(fn)
+    fn, _ = os.path.splitext(fn)
+    return fn
+
 def global_metadata(cc, prj):
     return {
         "format": "png24",
@@ -28,7 +36,7 @@ def global_metadata(cc, prj):
         "maxzoom": 22,
         "scale": 1,
         "metatile": 2,
-        "name": "test",
+        "name": file_name(prj),
         "description": ""
     }
 
