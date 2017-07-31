@@ -11,7 +11,7 @@
 name=CartoCssExport
 qgisMinimumVersion=2.0
 description=Export QGIS project files to CartoCSS
-version=1.0
+version=0.9
 author=Geoinformatikbüro Dassau GmbH
 email=info@gbd-consult.de
 
