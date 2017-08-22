@@ -9,9 +9,12 @@ class Process:
         self._errors = set()
         self._rules = []
         self._props = {}
-        self._ds = {}
+        self._exprs = {}
+        self._meta = {}
         self._prj = prj
         self._uid = 0
+        self._exprs = {}
+        self._layer_stack = []
 
     def register_exporters(self, fns):
         self._fns = fns
@@ -19,56 +22,34 @@ class Process:
     def run(self):
         self._meta = project.metadata(self, self._prj)
         self._rules = self.export(self._prj)
-        self.enum_rules(self._rules)
-
-        # debug.ppp(self._rules, maxdepth=999)
-
-        self._ds = {}
-
-        self.convert_expressions(self._rules)
-        self.add_expressions(self._meta)
-
+        self.insert_expressions(self._meta)
         css_text = css.indent(css.generate(self, self._rules))
-
         return result.ExportResult(self._meta, css_text, self._errors)
 
-    def enum_rules(self, rules):
-        for r in rules:
-            if r:
-                r.uid = self._uid
+    def var(self, expr):
+        la = self._layer_stack[-1]
+        expr = expr.strip()
+        if not expr:
+            return ''
+        key = (expr, la.id())
+        if key not in self._exprs:
+            self._exprs[key] = len(self._exprs)
+        return '_e%d' % self._exprs[key]
 
-        self._uid += 1
-
-        for r in rules:
-            if r:
-                self.enum_rules(getattr(r, 'sub', []))
-
-    def add_expressions(self, meta):
+    def insert_expressions(self, meta):
         for lp in meta['Layer']:
-            if 'Datasource' in lp and '_table' in lp['Datasource']:
+            if 'Datasource' in lp and '_orig_table' in lp['Datasource']:
                 select = ['*']
-                for k, expr_id in self._ds.items():
-                    expr, la_id = k
-                    if la_id == lp['_id']:
-                        select.append('(\n%s\n)::int AS _e%d' % (expr.strip(), expr_id))
-                lp['Datasource']['table'] = '(SELECT %s\nFROM %s) AS t' % (
-                    ',\n\n'.join(select),
-                    lp['Datasource']['_table']
-                )
-                del lp['Datasource']['_table']
-                del lp['_id']
 
-    def convert_expressions(self, rules, la=None):
-        for r in rules:
-            if getattr(r, 'expr', None):
-                key = (r.expr, la.id())
-                if key in self._ds:
-                    expr_id = self._ds[key]
-                else:
-                    expr_id = len(self._ds)
-                    self._ds[key] = expr_id
-                r.expr = '_e%d=1' % expr_id
-            self.convert_expressions(getattr(r, 'sub', []), getattr(r, 'layer', la))
+                for k, expr_id in self._exprs.items():
+                    expr, la_id = k
+                    if la_id == lp['_orig_id']:
+                        select.append('(%s)::int AS _e%d' % (expr, expr_id))
+
+                lp['Datasource']['table'] = '(SELECT %s FROM %s) AS t' % (
+                    ', '.join(select),
+                    lp['Datasource']['_orig_table']
+                )
 
     def error(self, msg, arg=''):
         self._errors.add((msg, unicode(arg)))
@@ -83,14 +64,20 @@ class Process:
             return fn(self, obj)
         self.error(error.CLASS_NOT_IMPLEMENTED, cls)
 
-    def rule(self, obj, typ, **kwargs):
-        return Rule(obj, typ, **kwargs)
+    def enter_layer(self, la):
+        self._layer_stack.append(la)
+
+    def leave_layer(self):
+        self._layer_stack.pop()
+
+    def clause(self, obj, typ, **kwargs):
+        return Clause(obj, typ, **kwargs)
 
     def errors(self):
         return sorted(self._errors)
 
 
-class Rule:
+class Clause:
     def get_comment(self):
         try:
             return self.obj.description()
@@ -108,7 +95,6 @@ class Rule:
     def __init__(self, obj, typ, **kwargs):
         self.typ = typ or obj.__class__.__name__
         self.obj = obj
-        self.comment = self.get_comment()
-
+        self.comment = kwargs.get('comment') or self.get_comment()
         for k, v in kwargs.items():
             setattr(self, k, v)

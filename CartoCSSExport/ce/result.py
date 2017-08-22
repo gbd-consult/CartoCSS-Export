@@ -3,15 +3,30 @@ import os
 
 import miniyaml, debug
 
+
 def _mkdir(p):
     if not os.path.exists(p):
         os.mkdir(p)
     return p
 
 
+def _remove_private(x):
+    if isinstance(x, dict):
+        return {
+            k: _remove_private(v)
+            for k, v in x.items()
+            if not k.startswith('_')
+        }
+
+    if isinstance(x, (tuple, list)):
+        return [_remove_private(y) for y in x]
+
+    return x
+
+
 class ExportResult:
     def __init__(self, meta, css, errors):
-        self.meta = meta
+        self.meta = _remove_private(meta)
         self.css = css
         self.errors = errors
         self.name = self.meta['name']

@@ -1,7 +1,7 @@
 """Format CartoCSS values."""
 
 import re
-import error
+import error, debug
 
 # from https://github.com/mapbox/carto/blob/master/lib/carto/tree/zoom.js
 
@@ -65,8 +65,8 @@ def minmax(amin, val, amax):
 
 
 # @todo: arbitrary values to replace mapUnits
-MAP_UNIT_SIZE_MIN = 2
-MAP_UNIT_SIZE_MAX = 20
+MAP_UNIT_SIZE_MIN = 4.2
+MAP_UNIT_SIZE_MAX = 4.2
 MAP_UNIT_FONT_SIZE = 12
 
 
@@ -168,10 +168,10 @@ def as_zoom(val):
                 return max(0, l - 1), l
         return CartoMaxZoom, CartoMaxZoom
 
-    qmin, qmax = map(int, val)
+    v1, v2 = map(int, val)
 
-    a1, a2 = scale_to_level(max(qmin, qmax))
-    z1, z2 = scale_to_level(min(qmin, qmax))
+    a1, a2 = scale_to_level(max(v1, v2))
+    z1, z2 = scale_to_level(min(v1, v2))
 
     ao = '>=' if a1 == a2 else '>'
     zo = '<=' if z1 == z2 else '<'

@@ -1,7 +1,7 @@
 """CSS generator."""
 
 import re
-import value, expression
+import debug, value, expression
 
 map_props = {
     'background-color': ['color', '#fff']
@@ -53,51 +53,52 @@ def _uid():
     return __uid
 
 
-def generate_rule(cc, rule):
-    """Generate mss text from a ruleset."""
+def generate_clause(cc, clause):
+    """Generate mss text from a set of style clauses."""
 
-    if not rule:
+    if not clause:
         return ''
 
-    if isinstance(rule, list):
-        return '\n'.join(generate_rule(cc, r) for r in rule)
+    if isinstance(clause, list):
+        return '\n'.join(generate_clause(cc, r) for r in clause)
 
     sel = []
 
-    if hasattr(rule, 'id'):
-        sel.append('#' + rule.id)
+    if hasattr(clause, 'id'):
+        sel.append('#' + clause.id)
 
-    if getattr(rule, 'expr', ''):
-        sel.append('[%s]' % rule.expr)
+    if getattr(clause, 'filter', ''):
+        sel.append('[%s=1]' % clause.filter)
 
-    if hasattr(rule, 'zoom'):
-        sel.append(value.as_zoom(rule.zoom))
+    if hasattr(clause, 'zoom'):
+        sel.append(value.as_zoom(clause.zoom))
 
-    subs = [s for s in getattr(rule, 'sub', []) if s]
-    props = getattr(rule, 'props', {})
+    subs = [s for s in getattr(clause, 'sub', []) if s]
+    props = getattr(clause, 'props', {})
 
     if not sel:
         if not props and len(subs) < 2:
-            return generate_rule(cc, subs)
+            return generate_clause(cc, subs)
 
     sel = ''.join(sel)
 
     if '#' not in sel:
-        # sel = '::' + rule.typ + '_' + str(rule.uid) + sel
-        sel = '::' + rule.typ + '_' + str(_uid()) + sel
+        sel = '::' + clause.typ + '_' + str(_uid()) + sel
 
-    content = generate_rule(cc, subs) + '\n' + _format_props(cc, props)
+    content = generate_clause(cc, subs) + '\n' + _format_props(cc, props)
     content = content.strip()
 
     if content:
         content = sel + ' {\n' + content + '\n}\n'
-        if rule.comment:
-            content = '/* ' + rule.comment + ' */\n' + content
+        if clause.comment:
+            s = clause.comment.strip()
+            s = re.sub(r'\s+', ' ', s.replace('*', ' '))
+            content = '/* ' + s + ' */\n' + content
         return content
 
     return ''
 
 
-def generate(cc, rule):
-    s = generate_rule(cc, rule)
+def generate(cc, clause):
+    s = generate_clause(cc, clause)
     return 'Map {\n' + _format_props(cc, map_props) + '\n}\n' + s

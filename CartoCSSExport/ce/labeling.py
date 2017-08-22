@@ -6,7 +6,7 @@ import debug
 import style
 
 
-def normalize_props(props):
+def _normalize(props):
     if not props:
         return None
 
@@ -32,60 +32,62 @@ def normalize_props(props):
     props.pop('drawLabels', None)
     props.pop('enabled', None)
 
-    return {k:v for k, v in props.items() if k not in defs.LabelDefaults or v != defs.LabelDefaults[k]}
+    return props
 
 
-class CeLabelingSymbolLayer:
-    # must support layerType and properties
+class CeSimpleLabeling:
+    def __init__(self, props):
+        self.props = _normalize(props)
+
+    def layerType(self):
+        return 'SimpleLabeling'
 
     def properties(self):
         return self.props
 
 
-class CeSimpleLabeling(CeLabelingSymbolLayer):
-    def __init__(self, props):
-        self.props = normalize_props(props)
-
-    def layerType(self):
-        return 'SimpleLabeling'
-
-
 def exportCeSimpleLabeling(cc, lab):
     props = style.convert(cc, lab, 'label')
-    return cc.rule(lab, lab.layerType(), props=props)
+    return cc.clause(lab, lab.layerType(), props=props)
 
 
-class CeRuleBasedLabeling(CeLabelingSymbolLayer):
+class CeRuleBasedLabeling:
     def __init__(self, rules):
         self.sub = rules
+        self.props = []
 
     def layerType(self):
         return 'RuleLabeling'
 
+    def properties(self):
+        return self.props
+
 
 def exportCeRuleBasedLabeling(cc, lab):
-    return cc.rule(lab, '', sub=[cc.export(r) for r in lab.sub])
+    return cc.clause(lab, '', sub=[cc.export(r) for r in lab.sub])
 
 
-class CeRuleBasedLabelingRule(CeLabelingSymbolLayer):
+class CeRuleBasedLabelingRule:
     def __init__(self, attributes, props, sub):
         self.attributes = attributes
-        self.props = normalize_props(props)
+        self.props = _normalize(props)
         self.sub = sub
 
     def layerType(self):
         return 'LabelingRule'
 
+    def properties(self):
+        return self.props
+
 
 def exportCeRuleBasedLabelingRule(cc, lab):
-
-    r = cc.rule(lab, lab.layerType(), sub=[cc.export(r) for r in lab.sub])
+    r = cc.clause(lab, lab.layerType(), sub=[cc.export(r) for r in lab.sub])
 
     if 'scalemaxdenom' in lab.attributes:
         r.zoom = [lab.attributes['scalemindenom'], lab.attributes['scalemaxdenom']]
 
     if 'filter' in lab.attributes:
-        r.expr = lab.attributes['filter']
+        r.filter = cc.var(lab.attributes['filter'])
 
     if lab.props:
         r.props = style.convert(cc, lab, 'label')

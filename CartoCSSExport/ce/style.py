@@ -9,6 +9,9 @@ LineStyle = ['solid', 'no', 'dash', 'dot', 'dash dot', 'dash dot dot']
 
 
 class SymbolLayerProps:
+    bufferDraw = 0
+    bufferColor = 0
+    bufferSize = 0
     capstyle = ['square', 'flat', 'round']
     color = 0
     customdash_unit = Unit
@@ -16,6 +19,7 @@ class SymbolLayerProps:
     fontFamily = ''
     fontSize = 0
     fontSizeInMapUnits = 0
+    isExpression = 0
     joinstyle = ['miter', 'bevel', 'round']
     line_color = 0
     line_style = LineStyle
@@ -34,7 +38,7 @@ class SymbolLayerProps:
     size_unit = Unit
     # @todo: implement with polygon-pattern-file
     # "horizontal","vertical","cross","b_diagonal","f_diagonal","diagonal_x","dense1..7 #
-    style = ['solid','no']
+    style = ['solid', 'no']
     textColor = 0
     use_custom_dash = 0
 
@@ -47,10 +51,16 @@ ResolveDefs = {
 
 def symbol_props(cc, sla):
     p = SymbolLayerProps()
+    typ = sla.layerType()
+    defaults = defs.Defaults.get(typ, {})
 
     for name, val in sla.properties().items():
-        prop = '%s.%s' % (sla.layerType(), name)
-        info = '%s.%s=%s' % (sla.layerType(), name, val)
+        if val == defaults.get(name):
+            # debug.pp(['default', name, val])
+            continue
+
+        prop = '%s.%s' % (typ, name)
+        info = '%s.%s=%s' % (typ, name, val)
 
         if not hasattr(p, name):
             # debug.pp([prop, val])
@@ -155,7 +165,13 @@ def do_label(cc, p, d):
 
     d['text-face-name'] = 'string', p.fontFamily + ' ' + p.namedStyle
     d['text-fill'] = 'color', p.textColor
-    d['text-name'] = 'field', p.fieldName
+
+    if p.isExpression == '1':
+        # this doesn't really work because QGIS syntax != postgres
+        cc.error(error.EXPRESSION_NOT_SUPPORTED)
+        d['text-name'] = 'string', ''
+    else:
+        d['text-name'] = 'field', p.fieldName
 
     if p.fontSizeInMapUnits == '1':
         d['text-size'] = 'fontsize', [p.fontSize, 'MapUnit']
@@ -163,6 +179,10 @@ def do_label(cc, p, d):
         d['text-size'] = 'fontsize', [p.fontSize, 'px']
 
     # d['text-allow-overlap'] = 'int', 1
+
+    if p.bufferDraw == '1':
+        d['text-halo-radius'] = 'float', p.bufferSize
+        d['text-halo-fill'] = 'color', p.bufferColor
 
 
 def convert(cc, sla, fns):

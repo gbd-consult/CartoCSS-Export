@@ -17,7 +17,6 @@ SymbolType = {
     3: 'Hybrid'
 }
 
-
 LabelDefaults = {
     "addDirectionSymbol": "0",
     "angleOffset": "0",
@@ -127,13 +126,31 @@ LabelDefaults = {
     "shapeSizeY": "0",
     "shapeTransparency": "0",
     "shapeType": "0",
+    "substitutions": "<substitutions/>",
     "textColor": "0,0,0,255",
     "textTransp": "0",
     "upsidedownLabels": "0",
+    "useSubstitutions": "0",
     "wrapChar": "",
     "xOffset": "0",
     "yOffset": "0",
-    "zIndex": "0"
+    "zIndex": "0",
+}
+
+Defaults = {
+    'SimpleLabeling': LabelDefaults,
+    'RuleLabeling': LabelDefaults,
+    'LabelingRule': LabelDefaults,
+    'SimpleFill': {
+        "border_width_map_unit_scale": "0,0,0,0,0,0",
+        "offset_map_unit_scale": "0,0,0,0,0,0"
+    },
+    'SimpleMarker': {
+        "angle": "0",
+        "size_map_unit_scale": "0,0,0,0,0,0",
+        "offset_map_unit_scale": "0,0,0,0,0,0",
+        "outline_width_map_unit_scale": "0,0,0,0,0,0"
+    }
 }
 
 # generated from qgspallabeling.h

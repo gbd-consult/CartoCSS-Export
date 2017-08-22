@@ -75,8 +75,7 @@ def metadata(cc, la):
         'srs-name': 'custom',
         'id': id_of(la),
         'name': id_of(la),
-        '_id': la.id(),
-
+        '_orig_id': la.id(),
     }
 
     if dataprovider.metadata(cc, la.dataProvider(), meta):
@@ -91,7 +90,7 @@ def exportQgsVectorLayer(cc, la):
     if lab:
         sub.append(cc.export(lab))
 
-    r = cc.rule(la, 'VectorLayer', id=id_of(la), layer=la, sub=sub)
+    r = cc.clause(la, 'VectorLayer', id=id_of(la), layer=la, sub=sub)
 
     if la.hasScaleBasedVisibility():
         r.zoom = [la.minimumScale(), la.maximumScale()]
@@ -100,6 +99,6 @@ def exportQgsVectorLayer(cc, la):
 
 
 def exportQgsRasterLayer(cc, la):
-    return cc.rule(la, 'RasterLayer', id=id_of(la), layer=la, props={
+    return cc.clause(la, 'RasterLayer', id=id_of(la), layer=la, props={
         'raster-opacity': ('float', 1)
     })

@@ -2,11 +2,16 @@
 
 from qgis.core import *
 
-import defs, error
+import defs, error, debug
+
+
+def _srs(dp, meta):
+    meta['_crs_object'] = dp.crs()
+    meta['srs'] = dp.crs().toProj4()
 
 
 def meta_gdal(cc, dp, meta):
-    meta['srs'] = dp.crs().toProj4()
+    _srs(dp, meta)
     meta['geometry'] = 'raster'
     meta['Datasource'] = {
         'file': dp.dataSourceUri()
@@ -14,7 +19,7 @@ def meta_gdal(cc, dp, meta):
 
 
 def meta_ogr(cc, dp, meta):
-    meta['srs'] = dp.crs().toProj4()
+    _srs(dp, meta)
     meta['geometry'] = defs.WkbType[dp.geometryType()]
     # uri is like path|layerid=0
     uri = dp.dataSourceUri()
@@ -24,7 +29,7 @@ def meta_ogr(cc, dp, meta):
 
 
 def meta_postgres(cc, dp, meta):
-    meta['srs'] = dp.crs().toProj4()
+    _srs(dp, meta)
     meta['geometry'] = defs.WkbType[dp.geometryType()]
     ds = QgsDataSourceURI(dp.dataSourceUri())
     key = ds.keyColumn()
@@ -32,7 +37,7 @@ def meta_postgres(cc, dp, meta):
         key = ''
     meta['Datasource'] = {
         'type': 'postgis',
-        '_table': ds.quotedTablename(),
+        '_orig_table': ds.quotedTablename(),
         'table': '(SELECT * FROM %s) AS t' % ds.quotedTablename(),
         'key_field': key,
         'geometry_field': ds.geometryColumn(),
