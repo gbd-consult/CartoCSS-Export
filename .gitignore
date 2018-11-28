@@ -1,9 +1,13 @@
-.idea
+*.bak
 *.iml
 *.pyc
 *.qgs~
+*.swp
+._*
 .DS_Store
-temp*
-node_modules
-doc/_build
+.idea
+__pycache__
 doc/_apidoc
+doc/_build
+node_modules
+___*
