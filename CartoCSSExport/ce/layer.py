@@ -9,6 +9,7 @@ from qgis.core import *
 
 import dataprovider
 import labeling
+import debug
 
 
 def xml2dict(node):
@@ -82,15 +83,30 @@ def metadata(cc, la):
         return meta
 
 
+def layer_style(layer_dict):
+    props = {}
+
+    for v in layer_dict['children']:
+        if v.get('name') == 'layerTransparency':
+            v = v['children'][0]['value']
+            if v != '0':
+                props['opacity'] = 'float', (100 - int(v)) / 100.0
+
+    return props
+
+
 def exportQgsVectorLayer(cc, la):
+    d = to_dict(la)
+    props = layer_style(d)
+
     sub = [cc.export(la.rendererV2())]
 
     # Since there's no python API for labeling V2, read props from the layer XML.
-    lab = labeling.from_layer_dict(to_dict(la))
+    lab = labeling.from_layer_dict(d)
     if lab:
         sub.append(cc.export(lab))
 
-    r = cc.clause(la, 'VectorLayer', id=id_of(la), layer=la, sub=sub)
+    r = cc.clause(la, 'VectorLayer', id=id_of(la), layer=la, props=props, sub=sub)
 
     if la.hasScaleBasedVisibility():
         r.zoom = [la.minimumScale(), la.maximumScale()]

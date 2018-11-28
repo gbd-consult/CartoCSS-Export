@@ -34,12 +34,13 @@ CartoZoomRanges = {
 
 CartoMaxZoom = max(CartoZoomRanges)
 
-mm_per_inch = 25.4
-default_ppi = 90
-
 
 def as_string(val):
     return "'%s'" % unicode(val).strip().replace("'", "\\'")
+
+
+def as_keyword(val):
+    return "%s" % unicode(val)
 
 
 def to_float_with_comma(s):
@@ -69,9 +70,15 @@ MAP_UNIT_SIZE_MIN = 4.2
 MAP_UNIT_SIZE_MAX = 4.2
 MAP_UNIT_FONT_SIZE = 12
 
+CONVERT_MM_TO_PX = False
+DEFAULT_PPI = 90
+
 
 def as_size(val):
     v, unit = val
+
+    if not v:
+        return '0'
 
     v = to_float_with_comma(v)
     unit = unit.lower()
@@ -79,7 +86,9 @@ def as_size(val):
     if unit == 'mapunit':
         return to_int(minmax(MAP_UNIT_SIZE_MIN, v, MAP_UNIT_SIZE_MAX)), error.UNIT_NOT_IMPLEMENTED, unit
     elif unit == 'mm':
-        return to_int((v / mm_per_inch) * default_ppi)
+        if CONVERT_MM_TO_PX:
+            return to_int((v / 25.4) * DEFAULT_PPI)
+        return str(v) + 'mm'
     elif unit in ('pixel', 'px'):
         return to_int(v)
     else:

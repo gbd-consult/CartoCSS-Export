@@ -32,3 +32,9 @@ INVALID_COLOR = 'INVALID_COLOR'
 
 #: Invalid field specification, only identifier fields are supported
 INVALID_FIELD = 'INVALID_FIELD'
+
+#: Unknown CSS property
+INVALID_CSS_PROP = 'INVALID_CSS_PROP'
+
+#: expression too complex
+COMPLEX_EXPRESSION = 'COMPLEX_EXPRESSION'

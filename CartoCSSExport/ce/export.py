@@ -1,5 +1,6 @@
 """Export controller."""
 
+import re
 import error, result, css, project, debug
 
 
@@ -26,30 +27,63 @@ class Process:
         css_text = css.indent(css.generate(self, self._rules))
         return result.ExportResult(self._meta, css_text, self._errors)
 
+    # https://tilemill-project.github.io/tilemill/docs/guides/selectors/
+
+    _simple_expr = r"""(?x)
+        ^
+            (
+                (?P<ident> \w+)
+                |
+                " (?P<ident2> \w+) "
+            )
+            \s*
+            (?P<operator> [!=<>]+)
+            \s*
+            (?P<value>
+                [-\d.]+
+                |
+                '[^']*'
+            )
+        $
+    """
+
     def var(self, expr):
         la = self._layer_stack[-1]
         expr = expr.strip()
         if not expr:
             return ''
-        key = (expr, la.id())
-        if key not in self._exprs:
-            self._exprs[key] = len(self._exprs)
-        return '_e%d' % self._exprs[key]
+
+        m = re.match(self._simple_expr, expr.strip())
+        if not m:
+            self.error(error.COMPLEX_EXPRESSION, expr)
+            return ''
+
+        m = m.groupdict()
+        return '%s %s %s' % (m.get('ident') or m.get('ident2'), m.get('operator'), m.get('value'))
+
+        # removed support for complex expressions
+        # key = (expr, la.id())
+        # if key not in self._exprs:
+        #     self._exprs[key] = len(self._exprs)
+        #
+        # return '_e%d' % self._exprs[key]
 
     def insert_expressions(self, meta):
         for lp in meta['Layer']:
             if 'Datasource' in lp and '_orig_table' in lp['Datasource']:
-                select = ['*']
-
-                for k, expr_id in self._exprs.items():
-                    expr, la_id = k
-                    if la_id == lp['_orig_id']:
-                        select.append('(%s)::int AS _e%d' % (expr, expr_id))
-
-                lp['Datasource']['table'] = '(SELECT %s FROM %s) AS t' % (
-                    ', '.join(select),
-                    lp['Datasource']['_orig_table']
-                )
+                # removed support for complex expressions
+                # select = ['*']
+                #
+                # for k, expr_id in self._exprs.items():
+                #     expr, la_id = k
+                #     if la_id == lp['_orig_id']:
+                #         select.append('(%s)::int AS _e%d' % (expr, expr_id))
+                #
+                # lp['Datasource']['table'] = '(SELECT %s FROM %s) AS t' % (
+                #     ', '.join(select),
+                #     lp['Datasource']['_orig_table']
+                # )
+                lp['Datasource']['table'] = lp['Datasource']['_orig_table']
 
     def error(self, msg, arg=''):
         self._errors.add((msg, unicode(arg)))
@@ -96,5 +130,6 @@ class Clause:
         self.typ = typ or obj.__class__.__name__
         self.obj = obj
         self.comment = kwargs.get('comment') or self.get_comment()
+        self.props = {}
         for k, v in kwargs.items():
             setattr(self, k, v)

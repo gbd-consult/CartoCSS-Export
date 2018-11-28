@@ -70,7 +70,7 @@ LabelDefaults = {
     "offsetType": "0",
     "placeDirectionSymbol": "0",
     "placement": "1",
-    "placementFlags": "10",
+    "placementFlags": "0",
     "plussign": "0",
     "predefinedPositionOrder": "TR,TL,BR,BL,R,L,TSR,BSR",
     "preserveRotation": "1",

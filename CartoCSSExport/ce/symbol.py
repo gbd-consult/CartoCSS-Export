@@ -1,11 +1,17 @@
 """Converters for Qgs Symbols."""
 
-import defs, style
+import defs, style, debug
 
 
 def exportQgsSymbolV2(cc, sym):
+    props = {}
+
+    alpha = sym.alpha()
+    if alpha < 1:
+        props['opacity'] = 'float', alpha
+
     sub = [cc.export(sla) for sla in sym.symbolLayers()]
-    return cc.clause(sym, defs.SymbolType[int(sym.type())] + 'Symbol', sub=sub)
+    return cc.clause(sym, defs.SymbolType[int(sym.type())] + 'Symbol', props=props, sub=sub)
 
 
 def exportQgsFillSymbolV2(cc, sym):

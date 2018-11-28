@@ -1,11 +1,18 @@
 """CSS generator."""
 
 import re
-import debug, value, expression
+import debug, value, error, cartocss
 
 map_props = {
     'background-color': ['color', '#fff']
 }
+
+
+def _merge(*args):
+    d = {}
+    for a in args:
+        d.update(a or {})
+    return d
 
 
 def indent(text, size=2):
@@ -32,6 +39,15 @@ def _format_props(cc, plist):
     for name, val in plist.items():
         if isinstance(val, basestring):
             val = 'string', val
+
+        prop = cartocss.Properties.get(name)
+        if not prop:
+            cc.error(error.INVALID_CSS_PROP, name)
+            continue
+
+        if prop['type'] == 'keyword':
+            val = ('keyword',) + val[1:]
+
         f, err, errval = value.format(*val)
         if err:
             cc.error(err, unicode(errval))
@@ -53,14 +69,14 @@ def _uid():
     return __uid
 
 
-def generate_clause(cc, clause):
+def generate_clause(cc, clause, parent_props):
     """Generate mss text from a set of style clauses."""
 
     if not clause:
         return ''
 
     if isinstance(clause, list):
-        return '\n'.join(generate_clause(cc, r) for r in clause)
+        return '\n'.join(generate_clause(cc, r, parent_props) for r in clause)
 
     sel = []
 
@@ -68,7 +84,9 @@ def generate_clause(cc, clause):
         sel.append('#' + clause.id)
 
     if getattr(clause, 'filter', ''):
-        sel.append('[%s=1]' % clause.filter)
+        # removed complex expressions
+        # sel.append('[%s=1]' % clause.filter)
+        sel.append('[%s]' % clause.filter)
 
     if hasattr(clause, 'zoom'):
         sel.append(value.as_zoom(clause.zoom))
@@ -78,14 +96,20 @@ def generate_clause(cc, clause):
 
     if not sel:
         if not props and len(subs) < 2:
-            return generate_clause(cc, subs)
+            return generate_clause(cc, subs, parent_props)
 
     sel = ''.join(sel)
 
     if '#' not in sel:
         sel = '::' + clause.typ + '_' + str(_uid()) + sel
 
-    content = generate_clause(cc, subs) + '\n' + _format_props(cc, props)
+    props = _merge(parent_props, props)
+
+    if subs:
+        content = generate_clause(cc, subs, props)
+    else:
+        content = _format_props(cc, props)
+
     content = content.strip()
 
     if content:
@@ -100,5 +124,5 @@ def generate_clause(cc, clause):
 
 
 def generate(cc, clause):
-    s = generate_clause(cc, clause)
+    s = generate_clause(cc, clause, {})
     return 'Map {\n' + _format_props(cc, map_props) + '\n}\n' + s

@@ -8,6 +8,7 @@ import defs, error, debug
 def _srs(dp, meta):
     meta['_crs_object'] = dp.crs()
     meta['srs'] = dp.crs().toProj4()
+    meta['srs-name'] = dp.crs().authid()
 
 
 def meta_gdal(cc, dp, meta):

@@ -16,6 +16,7 @@ class SymbolLayerProps:
     color = 0
     customdash_unit = Unit
     fieldName = ''
+    fontCapitals = 0
     fontFamily = ''
     fontSize = 0
     fontSizeInMapUnits = 0
@@ -34,6 +35,7 @@ class SymbolLayerProps:
     outline_width = 0
     outline_width_unit = Unit
     placement = ['AroundPoint', 'Line', 'Curved', 'Horizontal', 'Free']
+    placementFlags = '0'
     size = 0
     size_unit = Unit
     # @todo: implement with polygon-pattern-file
@@ -163,8 +165,38 @@ def do_label(cc, p, d):
     if p.placement == 'Free':
         d['text-placement'] = 'interior'
 
+    # enum LinePlacementFlags
+    # {
+    #   OnLine    = 1,
+    #   AboveLine = 2,
+    #   BelowLine = 4,
+    #   MapOrientation = 8,
+    # };
+    #
+
+    pf = int(p.placementFlags or '0')
+    if pf & 2:
+        d['text-dx'] = 'int', +5
+        d['text-dy'] = 'int', +5
+    if pf & 4:
+        d['text-dx'] = 'int', -5
+        d['text-dy'] = 'int', -5
+
+    d['text-placement-type'] = 'list'
+
+
+
+
+
     d['text-face-name'] = 'string', p.fontFamily + ' ' + p.namedStyle
     d['text-fill'] = 'color', p.textColor
+
+    if p.fontCapitals == '1':
+        d['text-transform'] = 'uppercase'
+    if p.fontCapitals == '2':
+        d['text-transform'] = 'lowercase'
+    if p.fontCapitals == '4':
+        d['text-transform'] = 'capitalize'
 
     if p.isExpression == '1':
         # this doesn't really work because QGIS syntax != postgres
